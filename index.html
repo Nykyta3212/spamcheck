@@ -3,785 +3,544 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SpamScan — Spendbase</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Spendbase — Outreach Dashboard</title>
 <style>
   :root {
-    --bg:       #0d0e14;
-    --surface:  #13141c;
-    --surface2: #1a1b26;
-    --surface3: #20212e;
-    --border:   #252636;
-    --border2:  #2e2f44;
-    --text:     #e2e4f0;
-    --text2:    #9496b0;
-    --muted:    #5a5c75;
-    --accent:   #6c63ff;
-    --accent2:  #8b85ff;
-    --accent-glow: rgba(108,99,255,0.18);
-    --c10: #f03e5a;
-    --c9:  #f5622a;
-    --c8:  #f5920a;
-    --c7:  #f5bc00;
-    --c6:  #d4c200;
-    --c5:  #96bb00;
-    --c4:  #3fc760;
-    --c3:  #1fc998;
-    --c2:  #1bbfbe;
-    --c1:  #3aabf5;
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #1c2230;
+    --border: #1a0d99;
+    --accent: #3b7cff;
+    --accent-hover: #5590ff;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --text3: #4d5a6a;
+    --green: #2ea879;
+    --orange: #e6883a;
+    --red: #e05c5c;
+    --purple: #a371f7;
+    --teal: #2ec4b6;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px 20px; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-  }
+  /* HEADER */
+  .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; margin: -24px -20px 28px; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 28px; height: 28px; background: var(--accent); border-radius: 7px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 15px; }
+  .logo-name { font-size: 16px; font-weight: 600; color: var(--text); }
+  .logo-tag { font-size: 12px; color: var(--text2); margin-left: 4px; }
+  .top-right { display: flex; align-items: center; gap: 12px; }
+  .status-line { font-size: 12px; color: var(--text2); }
 
-  /* Subtle grid bg */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(108,99,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(108,99,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
+  /* BUTTONS */
+  .refresh-btn { padding: 8px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg3); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: border-color 0.15s, background 0.15s; }
+  .refresh-btn:hover { border-color: var(--accent); background: rgba(59,124,255,0.08); }
+  .refresh-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .spin { display: inline-block; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  .wrapper {
-    position: relative;
-    z-index: 1;
-    max-width: 920px;
-    margin: 0 auto;
-    padding: 28px 24px 48px;
-    width: 100%;
-  }
+  /* ERROR */
+  .error-box { background: rgba(224,92,92,0.1); border: 1px solid rgba(224,92,92,0.3); border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; color: #e05c5c; font-size: 13px; }
 
-  /* ── NAV ── */
-  nav {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 32px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-  }
+  /* FILTERS */
+  .filters-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; }
+  .filters-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 12px; }
+  .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+  select, input[type=date] { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg3); color: var(--text); font-size: 13px; outline: none; }
+  select:focus, input:focus { border-color: var(--accent); }
+  select option { background: var(--bg3); }
+  .reset-btn { padding: 8px 14px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg3); color: var(--text2); cursor: pointer; font-size: 13px; transition: color 0.15s; }
+  .reset-btn:hover { color: var(--text); border-color: var(--text2); }
 
-  .nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-  }
+  /* METRICS */
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .metric { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; transition: border-color 0.15s; }
+  .metric:hover { border-color: var(--accent); }
+  .metric-label { font-size: 11px; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+  .metric-value { font-size: 26px; font-weight: 600; line-height: 1; }
+  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 5px; }
+  .m-blue { color: var(--accent); }
+  .m-green { color: var(--green); }
+  .m-orange { color: var(--orange); }
+  .m-purple { color: var(--purple); }
+  .m-red { color: var(--red); }
+  .m-teal { color: var(--teal); }
+  .m-gray { color: var(--text); }
 
-  .logo-icon {
-    width: 32px;
-    height: 32px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    box-shadow: 0 0 18px rgba(108,99,255,0.45);
-  }
+  /* CARDS / CHARTS */
+  .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+  .card-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text2); margin-bottom: 16px; }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .bar-label { width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text2); font-size: 12px; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+  .bar-count { min-width: 36px; text-align: right; color: var(--text); font-size: 12px; font-weight: 600; }
 
-  .logo-text {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.2px;
-  }
+  /* BAR COLORS */
+  .fill-sent { background: var(--accent); }
+  .fill-opened { background: var(--green); }
+  .fill-replied { background: var(--teal); }
+  .fill-bounced { background: var(--red); }
+  .fill-default { background: var(--purple); }
+  .fill-campaign { background: var(--accent); }
+  .fill-account { background: var(--orange); }
 
-  .logo-text span {
-    color: var(--accent2);
-  }
+  /* TABLE */
+  .table-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 20px; }
+  .table-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+  .table-count { font-size: 12px; color: var(--text2); margin-top: 3px; }
+  .search-input { padding: 7px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg3); color: var(--text); font-size: 13px; width: 220px; outline: none; }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text3); }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 800px; }
+  th { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--text2); font-weight: 600; white-space: nowrap; cursor: pointer; user-select: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  th:hover { color: var(--text); }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--bg3); color: var(--text); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(59,124,255,0.04); }
 
-  .nav-sep {
-    color: var(--muted);
-    font-size: 18px;
-    margin: 0 2px;
-  }
+  /* BADGES */
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-sent { background: rgba(59,124,255,0.15); color: #6ea8ff; }
+  .badge-opened { background: rgba(46,168,121,0.15); color: #4fd1a0; }
+  .badge-replied { background: rgba(46,196,182,0.15); color: #4fd6cc; }
+  .badge-bounced { background: rgba(224,92,92,0.15); color: #f08080; }
+  .badge-default { background: rgba(163,113,247,0.15); color: #c09bff; }
 
-  .nav-tool {
-    font-size: 13px;
-    color: var(--text2);
-    font-weight: 500;
-  }
+  /* PAGINATION */
+  .pagination { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+  .page-btn { padding: 6px 13px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg3); color: var(--text); cursor: pointer; font-size: 12px; }
+  .page-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .page-info { font-size: 12px; color: var(--text2); }
 
-  .nav-badge {
-    margin-left: auto;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 20px;
-    padding: 3px 10px;
-    font-size: 11px;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-  }
+  /* WORKSPACE SWITCHER */
+  .ws-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .ws-btn { padding: 8px 18px; border: 1px solid var(--border); border-radius: 20px; background: transparent; color: var(--text2); cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; }
+  .ws-btn:hover { border-color: var(--accent); color: var(--text); }
+  .ws-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  /* ── HERO ── */
-  .hero {
-    margin-bottom: 24px;
-  }
+  /* MISC */
+  .placeholder { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 13px; }
+  .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
 
-  .hero h1 {
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.4px;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-
-  .hero p {
-    font-size: 13px;
-    color: var(--text2);
-    line-height: 1.5;
-  }
-
-  /* ── INPUT ── */
-  .input-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 12px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .input-card:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-  }
-
-  .input-label {
-    padding: 10px 14px 0;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--muted);
-  }
-
-  textarea {
-    width: 100%;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    line-height: 1.75;
-    resize: none;
-    min-height: 160px;
-    padding: 10px 14px 14px;
-  }
-
-  textarea::placeholder { color: var(--muted); }
-
-  /* ── CONTROLS ── */
-  .controls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 28px;
-  }
-
-  .btn {
-    padding: 9px 20px;
-    border-radius: 7px;
-    border: none;
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-    line-height: 1;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: white;
-    box-shadow: 0 2px 12px rgba(108,99,255,0.35);
-  }
-  .btn-primary:hover {
-    background: var(--accent2);
-    box-shadow: 0 4px 16px rgba(108,99,255,0.5);
-    transform: translateY(-1px);
-  }
-  .btn-primary:active { transform: translateY(0); }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--text2);
-    border: 1px solid var(--border2);
-  }
-  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
-
-  .score-badge {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    padding: 7px 14px;
-  }
-
-  .score-label {
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .score-number {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--c10);
-    font-family: 'JetBrains Mono', monospace;
-    transition: color 0.3s;
-    min-width: 28px;
-    text-align: right;
-  }
-
-  /* ── RESULTS ── */
-  .results-section { display: none; }
-  .results-section.visible {
-    display: block;
-    animation: fadeUp 0.25s ease;
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Stats */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 14px 16px;
-  }
-
-  .stat-val {
-    font-size: 26px;
-    font-weight: 700;
-    line-height: 1;
-    margin-bottom: 5px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  .stat-lbl {
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .c-danger { color: var(--c10); }
-  .c-warn   { color: var(--c7); }
-  .c-ok     { color: var(--c4); }
-  .c-accent { color: var(--accent2); }
-
-  /* Risk bar */
-  .risk-wrap {
-    margin-bottom: 18px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 12px 16px;
-  }
-
-  .risk-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-
-  .risk-title {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--muted);
-  }
-
-  .risk-pct {
-    font-size: 12px;
-    font-weight: 600;
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--text2);
-  }
-
-  .risk-bar {
-    height: 5px;
-    background: var(--surface3);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-
-  .risk-fill {
-    height: 100%;
-    border-radius: 999px;
-    transition: width 0.55s cubic-bezier(0.4,0,0.2,1);
-    background: linear-gradient(90deg, var(--c4), var(--c7), var(--c10));
-  }
-
-  /* Section labels */
-  .section-label {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--muted);
-    margin-bottom: 10px;
-    margin-top: 20px;
-  }
-
-  /* Flagged chips */
-  .found-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 7px;
-    margin-bottom: 20px;
-  }
-
-  .found-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 9px;
-    border-radius: 5px;
-    font-size: 12px;
-    font-family: 'JetBrains Mono', monospace;
-    border: 1px solid;
-    cursor: default;
-    font-weight: 500;
-  }
-
-  .found-score {
-    font-size: 10px;
-    font-weight: 700;
-    opacity: 0.65;
-  }
-
-  .found-cat {
-    font-size: 10px;
-    opacity: 0.45;
-    max-width: 90px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* Preview */
-  .preview-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 18px 20px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    line-height: 1.85;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    color: var(--text2);
-    margin-bottom: 20px;
-  }
-
-  /* Highlight spans */
-  .hi {
-    border-radius: 3px;
-    padding: 1px 3px;
-    cursor: default;
-    transition: filter 0.12s;
-    position: relative;
-    font-weight: 600;
-  }
-  .hi:hover { filter: brightness(1.25); }
-  .hi::after {
-    content: attr(data-score);
-    position: absolute;
-    top: -26px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--surface3);
-    border: 1px solid var(--border2);
-    color: var(--text);
-    font-size: 10px;
-    padding: 3px 7px;
-    border-radius: 5px;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.12s;
-    font-family: 'JetBrains Mono', monospace;
-    z-index: 100;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  }
-  .hi:hover::after { opacity: 1; }
-
-  .score-10 { background: rgba(240,62,90,0.18); color: #f57a92; border-bottom: 2px solid var(--c10); }
-  .score-9  { background: rgba(245,98,42,0.15); color: #f5916a; border-bottom: 2px solid var(--c9); }
-  .score-8  { background: rgba(245,146,10,0.15);color: #f5b554; border-bottom: 2px solid var(--c8); }
-  .score-7  { background: rgba(245,188,0,0.15); color: #f5cc44; border-bottom: 2px solid var(--c7); }
-  .score-6  { background: rgba(212,194,0,0.14); color: #d4c840; border-bottom: 2px solid var(--c6); }
-  .score-5  { background: rgba(150,187,0,0.14); color: #b0cc30; border-bottom: 2px solid var(--c5); }
-  .score-4  { background: rgba(63,199,96,0.12); color: #5ccc72; border-bottom: 2px solid var(--c4); }
-  .score-3  { background: rgba(31,201,152,0.12);color: #3dd4a4; border-bottom: 2px solid var(--c3); }
-  .score-2  { background: rgba(27,191,190,0.12);color: #2dcbc9; border-bottom: 2px solid var(--c2); }
-  .score-1  { background: rgba(58,171,245,0.12);color: #5abef5; border-bottom: 2px solid var(--c1); }
-
-  /* No issues */
-  .no-issues {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 20px;
-    background: rgba(63,199,96,0.07);
-    border: 1px solid rgba(63,199,96,0.2);
-    border-radius: 8px;
-    color: var(--c4);
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 20px;
-  }
-
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 24px 0;
-  }
-
-  /* ── LEGEND TABLE ── */
-  .legend {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-
-  .legend-row {
-    display: grid;
-    grid-template-columns: 56px 130px 1fr 180px;
-    border-bottom: 1px solid var(--border);
-    align-items: stretch;
-  }
-
-  .legend-row:last-child { border-bottom: none; }
-
-  .legend-row.header {
-    background: var(--surface2);
-  }
-
-  .legend-cell {
-    padding: 9px 14px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    border-right: 1px solid var(--border);
-    line-height: 1.3;
-  }
-
-  .legend-cell:last-child { border-right: none; }
-
-  /* Header cells */
-  .legend-row.header .legend-cell {
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--muted);
-    font-family: 'Inter', sans-serif;
-    padding: 8px 14px;
-  }
-
-  .l-score {
-    font-weight: 700;
-    font-size: 15px;
-    font-family: 'JetBrains Mono', monospace;
-    justify-content: center;
-  }
-
-  .l-level {
-    font-weight: 600;
-    font-size: 11px;
-    letter-spacing: 0.2px;
-  }
-
-  .l-desc {
-    font-size: 11.5px;
-    color: var(--text2);
-    line-height: 1.4;
-  }
-
-  .l-rec {
-    font-size: 11.5px;
-    font-weight: 500;
-    color: var(--text2);
+  @media (max-width: 600px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .search-input { width: 100%; }
+    .header { margin: -24px -20px 20px; padding: 12px 16px; }
   }
 </style>
 </head>
 <body>
-<div class="wrapper">
+<div class="container">
 
-  <nav>
-    <div class="nav-logo">
-      <div class="logo-icon">⚡</div>
-      <div class="logo-text">Spend<span>base</span></div>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="7" fill="#2563EB"/>
+        <path d="M20 7H13L10 16h6l-3 9 12-13h-7l2-5z" fill="white"/>
+      </svg>
+      <span class="logo-name">spendbase</span>
+      <span class="logo-tag">/ Outreach Dashboard</span>
     </div>
-    <span class="nav-sep">/</span>
-    <span class="nav-tool">SpamScan</span>
-    <div class="nav-badge">1192 triggers</div>
-  </nav>
-
-  <div class="hero">
-    <h1>Email Spam Word Checker</h1>
-    <p>Paste your cold email template to detect spam triggers, score risk, and get category context for each flagged word.</p>
-  </div>
-
-  <div class="input-card">
-    <div class="input-label">Email template</div>
-    <textarea id="inputText" placeholder="Subject: Quick question about {{company}}'s software spend
-
-Hi {{first_name}},
-
-I noticed you're scaling your engineering team and wanted to reach out...
-
-Ctrl+Enter to analyze"></textarea>
-  </div>
-
-  <div class="controls">
-    <button class="btn btn-primary" onclick="analyze()">Analyze</button>
-    <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
-    <div class="score-badge">
-      <span class="score-label">Total Score</span>
-      <span class="score-number" id="totalScore">—</span>
+    <div class="top-right">
+      <span class="status-line" id="status-line">Press "Refresh" to load data</span>
+      <button class="refresh-btn" id="refresh-btn" onclick="loadData()">
+        <span id="refresh-icon">↻</span> Refresh
+      </button>
     </div>
   </div>
 
-  <div class="results-section" id="results">
-    <div class="stats-row" id="statsRow"></div>
+  <div id="error-box" style="display:none" class="error-box"></div>
 
-    <div class="risk-wrap" id="riskBarWrap" style="display:none">
-      <div class="risk-header">
-        <span class="risk-title">Spam Risk</span>
-        <span class="risk-pct" id="riskPct">0%</span>
+  <!-- WORKSPACE SWITCHER -->
+  <div class="ws-bar" id="ws-bar">
+    <button class="ws-btn active" onclick="setWorkspace('', this)">All teams</button>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters-card">
+    <div class="filters-title">Filters</div>
+    <div class="filters-grid">
+      <select id="f-campaign" onchange="applyFilters()"><option value="">All campaigns</option></select>
+      <select id="f-account" onchange="applyFilters()"><option value="">All email accounts</option></select>
+      <select id="f-type" onchange="applyFilters()"><option value="">All event types</option></select>
+      <select id="f-month" onchange="applyMonth()"><option value="">All months</option></select>
+      <input type="date" id="f-from" onchange="applyFilters()" title="Date from">
+      <input type="date" id="f-to" onchange="applyFilters()" title="Date to">
+      <button class="reset-btn" onclick="resetFilters()">✕ Reset filters</button>
+    </div>
+  </div>
+
+  <!-- METRICS -->
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Total events</div><div class="metric-value m-gray" id="m-total">—</div></div>
+    <div class="metric"><div class="metric-label">Sent</div><div class="metric-value m-blue" id="m-sent">—</div></div>
+    <div class="metric"><div class="metric-label">Opened</div><div class="metric-value m-green" id="m-opened">—</div></div>
+    <div class="metric"><div class="metric-label">Replied</div><div class="metric-value m-teal" id="m-replied">—</div><div class="metric-sub">unique leads</div></div>
+    <div class="metric"><div class="metric-label">Bounced</div><div class="metric-value m-red" id="m-bounced">—</div></div>
+    <div class="metric"><div class="metric-label">Open rate</div><div class="metric-value m-green" id="m-open-rate">—</div><div class="metric-sub">opened / sent</div></div>
+    <div class="metric"><div class="metric-label">Reply rate</div><div class="metric-value m-teal" id="m-reply-rate">—</div><div class="metric-sub">replied / sent</div></div>
+    <div class="metric"><div class="metric-label">Bounce rate</div><div class="metric-value m-red" id="m-bounce-rate">—</div><div class="metric-sub">bounced / sent</div></div>
+    <div class="metric"><div class="metric-label">Campaigns</div><div class="metric-value m-purple" id="m-campaigns">—</div></div>
+    <div class="metric"><div class="metric-label">Email accounts</div><div class="metric-value m-orange" id="m-accounts">—</div></div>
+    <div class="metric"><div class="metric-label">Unique leads</div><div class="metric-value m-blue" id="m-leads">—</div></div>
+    <div class="metric"><div class="metric-label">Days active</div><div class="metric-value m-gray" id="m-days">—</div></div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts">
+    <div class="card">
+      <div class="card-title">Events by type</div>
+      <div id="chart-types"><div class="placeholder">No data</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top campaigns</div>
+      <div id="chart-campaigns"><div class="placeholder">No data</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top email accounts</div>
+      <div id="chart-accounts"><div class="placeholder">No data</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Events by day (last 30 days)</div>
+      <div id="chart-days"><div class="placeholder">No data</div></div>
+    </div>
+  </div>
+
+  <!-- TOP LEADS + STEPS -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Top active leads</div>
+      <div id="chart-leads"><div class="placeholder">No data</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Events by step</div>
+      <div id="chart-steps"><div class="placeholder">No data</div></div>
+    </div>
+  </div>
+
+  <!-- EVENTS TABLE -->
+  <div class="table-section">
+    <div class="table-header">
+      <div>
+        <div class="card-title" style="margin:0">All events</div>
+        <div class="table-count" id="table-count"></div>
       </div>
-      <div class="risk-bar"><div class="risk-fill" id="riskFill" style="width:0%"></div></div>
+      <input class="search-input" id="search" placeholder="Search by email, campaign..." oninput="applyFilters()">
     </div>
-
-    <div class="section-label">Flagged Words</div>
-    <div class="found-list" id="foundList"></div>
-
-    <div class="section-label">Preview with Highlights</div>
-    <div class="preview-box" id="previewBox"></div>
-
-    <div class="divider"></div>
-
-    <div class="section-label">Score Legend</div>
-    <div class="legend" id="legend"></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('timestamp')">Timestamp ↕</th>
+            <th onclick="sortBy('event_type')">Event type ↕</th>
+            <th onclick="sortBy('campaign_name')">Campaign ↕</th>
+            <th onclick="sortBy('lead_email')">Lead email ↕</th>
+            <th onclick="sortBy('email_account')">Email account ↕</th>
+            <th onclick="sortBy('step')">Step ↕</th>
+            <th onclick="sortBy('variant')">Variant ↕</th>
+            <th>Subject</th>
+            <th>Reply snippet</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"><tr><td colspan="9" class="placeholder">No data loaded</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <button class="page-btn" id="prev-btn" onclick="changePage(-1)" disabled>← Prev</button>
+      <span class="page-info" id="page-info"></span>
+      <button class="page-btn" id="next-btn" onclick="changePage(1)" disabled>Next →</button>
+    </div>
   </div>
+
 </div>
 
 <script>
-// ===== SPAM DATABASE =====
-const SPAM_DB = [["Cannot be combined with any other offer",6,"Legal/Compliance"],["They try to keep your money no refund",9,"Legal/Compliance"],["This message is CAN-SPAM compliant",8,"Legal/Compliance"],["Claims not to be selling anything",9,"Spam Indicators"],["The email asks for a credit card",10,"Money/Finance"],["If you no longer wish to receive",4,"Email Tech"],["Important information regarding",8,"Phishing"],["You will not believe your eyes",9,"Hype/Clickbait"],["We've been trying to reach you",8,"Subject Line"],["Confidentiality on all orders",8,"Legal/Compliance"],["Account verification required",8,"Security Scam"],["Account-based marketing (ABM)",2,"Email Tech"],["Your account needs attention",8,"Phishing"],["Consolidate debt and credit",9,"Debt/Credit"],["Unlimited earning potential",9,"MLM/WFH"],["Requires initial investment",9,"Money/Finance"],["They're just giving it away",8,"Free/Giveaway"],["Message contains disclaimer",8,"Spam Indicators"],["Will not believe your eyes",9,"Hype/Clickbait"],["Passive income opportunity",9,"MLM/WFH"],["Make money while you sleep",9,"Modern Spam 2025"],["Have you been turned down?",8,"Debt/Credit"],["Talks about hidden charges",8,"Spam Indicators"],["Hurry, while supplies last",8,"Urgency"],["Per government regulations",7,"Legal/Compliance"],["I came across your profile",4,"Modern Spam 2025"],["What are you waiting for?",8,"CTA"],["You are legally obligated",8,"Legal/Compliance"],["Unusual activity detected",8,"Phishing"],["Your information has been",8,"Security Scam"],["Long distance phone offer",8,"Spam Indicators"],["Immediate action required",8,"Urgency"],["Team building opportunity",7,"MLM/WFH"],["If only it were that easy",7,"Manipulation"],["Information you requested",7,"Phishing"],["Your payment was declined",7,"Phishing"],["Stop further distribution",7,"Spam Indicators"],["Exclusive for subscribers",6,"Modern Spam 2025"],["Confidentiality agreement",4,"Legal/Compliance"],["One hundred percent free",10,"Money/Finance"],["Claim your free gift now",10,"Subject Line"],["Lower your mortgage rate",9,"Debt/Credit"],["A message from your bank",9,"Subject Line"],["Urgent response required",9,"Urgency"],["Ground floor opportunity",8,"MLM/WFH"],["Only for our VIP members",7,"Modern Spam 2025"],["Confidential information",7,"Security Scam"],["Hope this finds you well",3,"Modern Spam 2025"],["You have been selected!",10,"Lottery/Scam"],["Financially independent",8,"MLM/WFH"],["In accordance with laws",8,"Spam Indicators"],["Verify your account now",8,"Subject Line"],["Satisfaction guaranteed",7,"Sales/Promo"],["Problem with your order",5,"Phishing"],["Guaranteed weight loss",10,"Health/Pharma"],["You have been selected",10,"Lottery/Scam"],["Online biz opportunity",10,"MLM/WFH"],["Social security number",10,"Security Scam"],["Cell phone cancer scam",10,"Spam Indicators"],["Dig up dirt on friends",10,"Spam Indicators"],["No income verification",9,"Debt/Credit"],["No prescription needed",9,"Health/Pharma"],["Payment details needed",9,"Phishing"],["Lower monthly payments",8,"Debt/Credit"],["Lowest insurance rates",8,"Debt/Credit"],["Zero percent financing",8,"Debt/Credit"],["No investment required",8,"Free/Giveaway"],["Money-making potential",8,"Money/Finance"],["Bargain hunter's dream",8,"Sales/Promo"],["Contact us immediately",7,"CTA"],["Crypto trading signals",7,"Crypto/Web3"],["To whom it may concern",7,"Greetings"],["Financial independence",7,"Money/Finance"],["Important notification",7,"Phishing"],["Restricted information",7,"Security Scam"],["Search engine listings",6,"Email Tech"],["Multi level marketing",10,"MLM/WFH"],["Multi-level marketing",10,"MLM/WFH"],["Mark this as not junk",10,"Spam Indicators"],["Undisclosed recipient",10,"Spam Indicators"],["Passive crypto income",9,"Crypto/Web3"],["Consolidate your debt",9,"Debt/Credit"],["Privately owned funds",9,"Lottery/Scam"],["Millionaire potential",9,"Money/Finance"],["Click below to access",8,"CTA"],["Lower monthly payment",8,"Debt/Credit"],["No purchase necessary",8,"Free/Giveaway"],["Explode your business",8,"Hype/Clickbait"],["Pure income potential",8,"Money/Finance"],["Click link to confirm",8,"Phishing"],["Confirm your identity",8,"Security Scam"],["Your account has been",8,"Security Scam"],["More internet traffic",7,"Email Tech"],["Confidential proposal",7,"Greetings"],["Scientifically proven",7,"Health/Pharma"],["Financial opportunity",7,"MLM/WFH"],["Going out of business",7,"Sales/Promo"],["Produced and sent out",7,"Spam Indicators"],["Stainless steel watch",7,"Spam Indicators"],["Breakthrough solution",5,"Hype/Clickbait"],["Problem with shipping",5,"Phishing"],["Eliminate bad credit",10,"Debt/Credit"],["Get out of debt fast",10,"Debt/Credit"],["Fast viagra delivery",10,"Health/Pharma"],["Human growth hormone",10,"Health/Pharma"],["Winning notification",10,"Lottery/Scam"],["You have been chosen",10,"Lottery/Scam"],["You've been selected",10,"Lottery/Scam"],["Become a millionaire",10,"MLM/WFH"],["Multilevel marketing",10,"MLM/WFH"],["Double your earnings",10,"Money/Finance"],["Make $1000 this week",10,"Subject Line"],["Click here to remove",9,"CTA"],["Free lifetime access",9,"Free/Giveaway"],["Dear [email address]",9,"Greetings"],["Money-making secrets",9,"Money/Finance"],["Notice of suspension",9,"Phishing"],["Read before deleting",9,"Subject Line"],["Click me to download",8,"CTA"],["Lower interest rates",8,"Debt/Credit"],["Lowest interest rate",8,"Debt/Credit"],["No credit experience",8,"Debt/Credit"],["Dear valued customer",8,"Greetings"],["Medical breakthrough",8,"Health/Pharma"],["Explode your profits",8,"Hype/Clickbait"],["Greetings of the day",8,"Lottery/Scam"],["Earn from your phone",8,"Modern Spam 2025"],["Earn while you watch",8,"Modern Spam 2025"],["Increase your wealth",8,"Money/Finance"],["Confirm your details",8,"Phishing"],["Confirm your account",8,"Security Scam"],["Your account will be",8,"Security Scam"],["Before it's too late",8,"Urgency"],["Exclusive invitation",7,"Greetings"],["Exciting opportunity",7,"Hype/Clickbait"],["Once in a generation",7,"Hype/Clickbait"],["Skyrocket your sales",7,"Hype/Clickbait"],["Business opportunity",7,"MLM/WFH"],["AI replaces your job",7,"Modern Spam 2025"],["Set it and forget it",7,"Modern Spam 2025"],["Re: Our conversation",7,"Phishing"],["Print form signature",7,"Spam Indicators"],["Print from signature",7,"Spam Indicators"],["Tells you it's an ad",7,"Spam Indicators"],["RE: Your application",7,"Subject Line"],["Your response needed",7,"Subject Line"],["Removal instructions",6,"Email Tech"],["Digital nomad income",6,"Modern Spam 2025"],["Money-back guarantee",6,"Sales/Promo"],["Click to unsubscribe",6,"Spam Indicators"],["Terms and conditions",4,"Legal/Compliance"],["Double your bitcoin",10,"Crypto/Web3"],["Instant weight loss",10,"Health/Pharma"],["Wealth without risk",10,"Money/Finance"],["10x your investment",9,"Crypto/Web3"],["Best mortgage rates",9,"Debt/Credit"],["All natural miracle",9,"Health/Pharma"],["Home based business",9,"MLM/WFH"],["Home-based business",9,"MLM/WFH"],["University diplomas",9,"MLM/WFH"],["Billionaire secrets",9,"Money/Finance"],["What's keeping you?",8,"CTA"],["Improve your credit",8,"Debt/Credit"],["Lower interest rate",8,"Debt/Credit"],["No deposit required",8,"Debt/Credit"],["No payment required",8,"Free/Giveaway"],["No strings attached",8,"Free/Giveaway"],["Social media income",8,"Modern Spam 2025"],["Cents on the dollar",8,"Money/Finance"],["Requires investment",8,"Money/Finance"],["Supplemental income",8,"Money/Finance"],["Thousands in income",8,"Money/Finance"],["Access your account",8,"Phishing"],["Dear account holder",8,"Phishing"],["Update your account",8,"Security Scam"],["Verify your account",8,"Security Scam"],["Time is running out",8,"Urgency"],["Free ChatGPT prompt",7,"Modern Spam 2025"],["Please confirm your",7,"Phishing"],["Claim your discount",7,"Sales/Promo"],["Drastically reduced",7,"Sales/Promo"],["Secure your account",7,"Security Scam"],["Suspicious activity",7,"Security Scam"],["Unauthorized access",7,"Security Scam"],["Only available here",7,"Urgency"],["While supplies last",7,"Urgency"],["Download attachment",6,"CTA"],["Affiliate marketing",6,"Modern Spam 2025"],["This message is for",6,"Phishing"],["Password protection",5,"Security Scam"],["Marketing solutions",4,"Email Tech"],["Your order is ready",4,"Subject Line"],["Crypto millionaire",10,"Crypto/Web3"],["Guaranteed returns",10,"Crypto/Web3"],["Breast enlargement",10,"Health/Pharma"],["Double your income",10,"Money/Finance"],["Double your wealth",10,"Money/Finance"],["Triple your income",10,"Money/Finance"],["Claims to be legal",10,"Spam Indicators"],["This is not a scam",10,"Spam Indicators"],["Debt consolidation",9,"Debt/Credit"],["Guaranteed results",9,"Guarantees"],["Eligible for prize",9,"Lottery/Scam"],["Selected specially",9,"Lottery/Scam"],["Homebased business",9,"MLM/WFH"],["Make money with AI",9,"Modern Spam 2025"],["Credit card offers",9,"Money/Finance"],["Passwords required",9,"Security Scam"],["Talks about prizes",9,"Spam Indicators"],["Credit score boost",8,"Debt/Credit"],["Repair your credit",8,"Debt/Credit"],["Free priority mail",8,"Free/Giveaway"],["No questions asked",8,"Free/Giveaway"],["Sign up free today",8,"Free/Giveaway"],["Prescription drugs",8,"Health/Pharma"],["Financial windfall",8,"Money/Finance"],["Initial investment",8,"Money/Finance"],["Potential earnings",8,"Money/Finance"],["New login detected",8,"Phishing"],["Auto email removal",8,"Spam Indicators"],["Sent in compliance",8,"Spam Indicators"],["For instant access",8,"Urgency"],["Once in a lifetime",8,"Urgency"],["Once-in-a-lifetime",8,"Urgency"],["Subscribe for free",7,"Free/Giveaway"],["Special invitation",7,"Greetings"],["Doctor recommended",7,"Health/Pharma"],["Double blind study",7,"Health/Pharma"],["Safe and effective",7,"Health/Pharma"],["Can't live without",7,"Hype/Clickbait"],["As required by law",7,"Legal/Compliance"],["Reclaim your money",7,"Money/Finance"],["Discreet packaging",7,"Security Scam"],["Limited time offer",7,"Urgency"],["Internet marketing",6,"Email Tech"],["Best in the market",6,"Hype/Clickbait"],["Work from anywhere",6,"Modern Spam 2025"],["The following form",6,"Spam Indicators"],["Reserves the right",5,"Legal/Compliance"],["Cancel at any time",5,"Sales/Promo"],["Marketing solution",4,"Email Tech"],["Lonely housewives",10,"Adult/Dating"],["You are a winner!",10,"Lottery/Scam"],["Guaranteed wealth",10,"Money/Finance"],["Wants credit card",10,"Money/Finance"],["This is not fraud",10,"Spam Indicators"],["This isn't a scam",10,"Spam Indicators"],["Avoice bankruptcy",9,"Debt/Credit"],["Claim your reward",9,"Lottery/Scam"],["AI passive income",9,"Modern Spam 2025"],["Passive AI income",9,"Modern Spam 2025"],["Additional income",9,"Money/Finance"],["Collect your cash",9,"Money/Finance"],["Earn extra income",9,"Money/Finance"],["Six-figure income",9,"Money/Finance"],["Account suspended",9,"Security Scam"],["Calling creditors",8,"Debt/Credit"],["Freedom from debt",8,"Debt/Credit"],["Signup free today",8,"Free/Giveaway"],["Dear [wrong name]",8,"Greetings"],["Unbelievable deal",8,"Hype/Clickbait"],["Confidential deal",8,"Legal/Compliance"],["Network marketing",8,"MLM/WFH"],["[Action required]",8,"Modern Spam 2025"],["CAPS LOCK subject",8,"Modern Spam 2025"],["Financial freedom",8,"Money/Finance"],["Staggering income",8,"Money/Finance"],["Ultimate earnings",8,"Money/Finance"],["Print out and fax",8,"Spam Indicators"],["Reply immediately",7,"CTA"],["No hidden charges",7,"Debt/Credit"],["Free installation",7,"Free/Giveaway"],["Secret to success",7,"Hype/Clickbait"],["Influencer income",7,"Modern Spam 2025"],["You won't believe",7,"Modern Spam 2025"],["Investment advice",7,"Money/Finance"],["Potential to earn",7,"Money/Finance"],["Secret strategies",7,"Money/Finance"],["Response required",7,"Phishing"],["We need to verify",7,"Phishing"],["Limited time only",7,"Urgency"],["Certified organic",6,"Health/Pharma"],["Subject to credit",6,"Legal/Compliance"],["Special promotion",6,"Sales/Promo"],["Verify your email",6,"Security Scam"],["Did you see this?",6,"Subject Line"],["Free consultation",5,"Free/Giveaway"],["Your subscription",5,"Phishing"],["Outstanding value",5,"Sales/Promo"],["Visit our website",4,"CTA"],["Dear [first name]",4,"Greetings"],["Friendly reminder",4,"Greetings"],["Digital marketing",3,"Email Tech"],["Content marketing",2,"Email Tech"],["Free grant money",10,"Free/Giveaway"],["Lose weight fast",10,"Health/Pharma"],["Lose weight spam",10,"Health/Pharma"],["Male enhancement",10,"Health/Pharma"],["Claim your prize",10,"Lottery/Scam"],["Dear beneficiary",10,"Lottery/Scam"],["Score with babes",10,"Lottery/Scam"],["You are a winner",10,"Lottery/Scam"],["You are selected",10,"Lottery/Scam"],["You're a winner!",10,"Lottery/Scam"],["Double your cash",10,"Money/Finance"],["Casual encounter",9,"Adult/Dating"],["Avoid bankruptcy",9,"Debt/Credit"],["Consolidate debt",9,"Debt/Credit"],["Unsecured credit",9,"Debt/Credit"],["Instant winnings",9,"Gambling"],["Fast weight loss",9,"Health/Pharma"],["Miracle solution",9,"Health/Pharma"],["Removes wrinkles",9,"Health/Pharma"],["Winner announced",9,"Lottery/Scam"],["Be your own boss",9,"MLM/WFH"],["Autopilot income",9,"Modern Spam 2025"],["Explosive income",9,"Money/Finance"],["Income from home",9,"Money/Finance"],["Instant earnings",9,"Money/Finance"],["IRS notification",9,"Phishing"],["Congratulations!",9,"Subject Line"],["Free information",8,"Free/Giveaway"],["No deposit bonus",8,"Gambling"],["No medical exams",8,"Health/Pharma"],["Incredible gains",8,"Hype/Clickbait"],["Will not believe",8,"Hype/Clickbait"],["Buying judgments",8,"Legal/Compliance"],["Safeguard notice",8,"Legal/Compliance"],["Foreign transfer",8,"Lottery/Scam"],["Amazon gift card",8,"Modern Spam 2025"],["Automated income",8,"Modern Spam 2025"],["Gift card reward",8,"Modern Spam 2025"],["Collect earnings",8,"Money/Finance"],["As seen on Oprah",8,"Spam Indicators"],["Message contains",8,"Spam Indicators"],["One time mailing",8,"Spam Indicators"],["Stop emailing me",8,"Spam Indicators"],["Open immediately",8,"Subject Line"],["Last opportunity",8,"Urgency"],["Once in lifetime",8,"Urgency"],["Invest in crypto",7,"Crypto/Web3"],["Poker tournament",7,"Gambling"],["Important notice",7,"Greetings"],["Best kept secret",7,"Hype/Clickbait"],["Incredible rates",7,"Hype/Clickbait"],["Tremendous offer",7,"Hype/Clickbait"],["Serious earnings",7,"Money/Finance"],["Can you help us?",7,"Phishing"],["Unbeatable offer",7,"Sales/Promo"],["Who really wins?",7,"Spam Indicators"],["Deal ending soon",7,"Urgency"],["Don't waste time",7,"Urgency"],["Last minute deal",7,"Urgency"],["Rare opportunity",7,"Urgency"],["See for yourself",6,"CTA"],["Internet traffic",6,"Email Tech"],["Over-the-counter",6,"Health/Pharma"],["Direct marketing",6,"MLM/WFH"],["Special discount",6,"Sales/Promo"],["Week trial offer",6,"Sales/Promo"],["Improve security",6,"Security Scam"],["Re: Your inquiry",6,"Subject Line"],["Online marketing",5,"Email Tech"],["Website visitors",5,"Email Tech"],["Price protection",5,"Sales/Promo"],["Industry leading",4,"Hype/Clickbait"],["Unsubscribe here",3,"Email Tech"],["Just checking in",3,"Modern Spam 2025"],["Order shipped by",3,"Transactional"],["Get out of debt",10,"Debt/Credit"],["Free investment",10,"Free/Giveaway"],["Online pharmacy",10,"Health/Pharma"],["Billion dollars",10,"Money/Finance"],["Earn extra cash",10,"Money/Finance"],["Million dollars",10,"Money/Finance"],["Triple earnings",10,"Money/Finance"],["Addresses on cd",10,"Spam Indicators"],["Email extractor",10,"Spam Indicators"],["Nigerian prince",10,"Spam Indicators"],["Replica watches",10,"Spam Indicators"],["This isn't junk",10,"Spam Indicators"],["This isn't spam",10,"Spam Indicators"],["Earn $500 today",10,"Subject Line"],["Debt settlement",9,"Debt/Credit"],["No credit check",9,"Debt/Credit"],["100% free trial",9,"Free/Giveaway"],["Absolutely free",9,"Free/Giveaway"],["Free cell phone",9,"Free/Giveaway"],["Free membership",9,"Free/Giveaway"],["Pharmaceuticals",9,"Health/Pharma"],["Congratulations",9,"Lottery/Scam"],["Deceased client",9,"Lottery/Scam"],["Unclaimed funds",9,"Lottery/Scam"],["Unclaimed money",9,"Lottery/Scam"],["Winning numbers",9,"Lottery/Scam"],["Recruit members",9,"MLM/WFH"],["Residual checks",9,"MLM/WFH"],["Infinite income",9,"Money/Finance"],["Internet income",9,"Money/Finance"],["Click to remove",8,"CTA"],["Take action now",8,"CTA"],["Fix your credit",8,"Debt/Credit"],["Get rid of debt",8,"Debt/Credit"],["Claim your free",8,"Free/Giveaway"],["Fantastic offer",8,"Hype/Clickbait"],["Incredible deal",8,"Hype/Clickbait"],["Home employment",8,"MLM/WFH"],["While you sleep",8,"MLM/WFH"],["Residual income",8,"Money/Finance"],["Ultimate income",8,"Money/Finance"],["Unlock earnings",8,"Money/Finance"],["Untapped income",8,"Money/Finance"],["Verified income",8,"Money/Finance"],["Verify identity",8,"Phishing"],["Click to verify",8,"Security Scam"],["Brand new pager",8,"Spam Indicators"],["Stop calling me",8,"Spam Indicators"],["Don't open this",8,"Subject Line"],["Act immediately",8,"Urgency"],["This won't last",8,"Urgency"],["Become a member",7,"CTA"],["Click this link",7,"CTA"],["Debt management",7,"Debt/Credit"],["No hidden costs",7,"Debt/Credit"],["Nothing to lose",7,"Free/Giveaway"],["Special for you",7,"Greetings"],["Credit or Debit",7,"Money/Finance"],["Potential bonus",7,"Money/Finance"],["Change password",7,"Phishing"],["Overdue payment",7,"Phishing"],["Security breach",7,"Phishing"],["Warning message",7,"Phishing"],["Instant savings",7,"Sales/Promo"],["Serious bargain",7,"Sales/Promo"],["Vacation offers",7,"Sales/Promo"],["Weekend getaway",7,"Sales/Promo"],["Cable converter",7,"Spam Indicators"],["Action required",7,"Urgency"],["Only a few left",7,"Urgency"],["Get started now",6,"CTA"],["Open attachment",6,"CTA"],["Hello (no name)",6,"Greetings"],["Subject to cash",6,"Legal/Compliance"],["Monthly payment",6,"Money/Finance"],["Delivery failed",6,"Phishing"],["Security update",6,"Phishing"],["Lifetime access",6,"Sales/Promo"],["Trial unlimited",6,"Sales/Promo"],["Unlimited trial",6,"Sales/Promo"],["Copy accurately",6,"Spam Indicators"],["While available",6,"Urgency"],["Email marketing",5,"Email Tech"],["Confidentiality",5,"Legal/Compliance"],["Print on demand",5,"Modern Spam 2025"],["Financial asset",5,"Money/Finance"],["Round the world",5,"Sales/Promo"],["Have you heard?",5,"Subject Line"],["Lead generation",3,"Email Tech"],["Cures baldness",10,"Health/Pharma"],["Growth hormone",10,"Health/Pharma"],["Lottery winner",10,"Lottery/Scam"],["Pyramid scheme",10,"MLM/WFH"],["Work from home",10,"MLM/WFH"],["Earn from home",10,"Money/Finance"],["Get rich quick",10,"Money/Finance"],["Eliminate debt",9,"Debt/Credit"],["Mortgage rates",9,"Debt/Credit"],["Refinance home",9,"Debt/Credit"],["Unsecured debt",9,"Debt/Credit"],["Reverses aging",9,"Health/Pharma"],["AI millionaire",9,"Modern Spam 2025"],["Instant income",9,"Money/Finance"],["Massive income",9,"Money/Finance"],["Massive profit",9,"Money/Finance"],["Save big money",9,"Money/Finance"],["Instant access",8,"CTA"],["Credit bureaus",8,"Debt/Credit"],["Pay your bills",8,"Debt/Credit"],["Giving it away",8,"Free/Giveaway"],["Online betting",8,"Gambling"],["Ancient secret",8,"Health/Pharma"],["Secret formula",8,"Health/Pharma"],["Hidden secrets",8,"Hype/Clickbait"],["Hidden charges",8,"Legal/Compliance"],["AI trading bot",8,"Modern Spam 2025"],["Earn per month",8,"Money/Finance"],["Expect to earn",8,"Money/Finance"],["Get your money",8,"Money/Finance"],["Passive income",8,"Money/Finance"],["Update account",8,"Phishing"],["Free antivirus",8,"Security Scam"],["Security alert",8,"Security Scam"],["Don't hesitate",7,"CTA"],["Cryptocurrency",7,"Crypto/Web3"],["No hidden fees",7,"Debt/Credit"],["Sports betting",7,"Gambling"],["Dear Sir/Madam",7,"Greetings"],["Natural remedy",7,"Health/Pharma"],["Fantastic deal",7,"Hype/Clickbait"],["Unknown secret",7,"Hype/Clickbait"],["100% satisfied",7,"Money/Finance"],["Financial gain",7,"Money/Finance"],["Join thousands",7,"Money/Finance"],["Account update",7,"Phishing"],["Phishing alert",7,"Phishing"],["Exclusive deal",7,"Sales/Promo"],["Shopping spree",7,"Sales/Promo"],["Private access",7,"Security Scam"],["Final reminder",7,"Subject Line"],["You're invited",6,"Greetings"],["Clinical trial",6,"Health/Pharma"],["It's effective",6,"Health/Pharma"],["Revenue stream",6,"Money/Finance"],["Secure payment",6,"Phishing"],["Lifetime offer",6,"Sales/Promo"],["Offer extended",6,"Sales/Promo"],["Fwd: Important",6,"Subject Line"],["Limited amount",6,"Urgency"],["Limited number",6,"Urgency"],["Limited supply",6,"Urgency"],["Time-sensitive",6,"Urgency"],["While in stock",6,"Urgency"],["Online account",5,"Phishing"],["Increase sales",5,"Sales/Promo"],["Groundbreaking",4,"Hype/Clickbait"],["Quick question",4,"Modern Spam 2025"],["Cancel anytime",4,"Sales/Promo"],["Privacy policy",3,"Legal/Compliance"],["Girls waiting",10,"Adult/Dating"],["Cure baldness",10,"Health/Pharma"],["!!!!! subject",10,"Modern Spam 2025"],["Email harvest",10,"Spam Indicators"],["Adult content",9,"Adult/Dating"],["Bad credit ok",9,"Debt/Credit"],["Credit repair",9,"Debt/Credit"],["Gamble online",9,"Gambling"],["Online casino",9,"Gambling"],["Slots jackpot",9,"Gambling"],["Reverse aging",9,"Health/Pharma"],["Online income",9,"MLM/WFH"],["Cash earnings",9,"Money/Finance"],["Hidden income",9,"Money/Finance"],["Huge earnings",9,"Money/Finance"],["Internet cash",9,"Money/Finance"],["Join billions",9,"Money/Finance"],["Join millions",9,"Money/Finance"],["Secret income",9,"Money/Finance"],["Home mortgage",8,"Debt/Credit"],["No collateral",8,"Debt/Credit"],["Free download",8,"Free/Giveaway"],["No investment",8,"Free/Giveaway"],["Risk-free bet",8,"Gambling"],["Bank official",8,"Lottery/Scam"],["Earn per week",8,"Money/Finance"],["Hidden wealth",8,"Money/Finance"],["Hidden assets",8,"Security Scam"],["Wire transfer",8,"Security Scam"],["24 hours only",8,"Urgency"],["Expires today",8,"Urgency"],["One time only",8,"Urgency"],["Order expires",8,"Urgency"],["Activate link",7,"CTA"],["Zero interest",7,"Debt/Credit"],["Welcome bonus",7,"Gambling"],["Youthful skin",7,"Health/Pharma"],["Amazing offer",7,"Hype/Clickbait"],["Amazing stuff",7,"Hype/Clickbait"],["Life-changing",7,"Hype/Clickbait"],["Legally yours",7,"Legal/Compliance"],["Survey reward",7,"Modern Spam 2025"],["Earn per year",7,"Money/Finance"],["Sign-up bonus",7,"Money/Finance"],["Action needed",7,"Phishing"],["Please verify",7,"Phishing"],["Compare rates",7,"Sales/Promo"],["Huge discount",7,"Sales/Promo"],["Why pay more?",7,"Sales/Promo"],["As seen on TV",7,"Spam Indicators"],["48 hours only",7,"Urgency"],["Limited offer",7,"Urgency"],["Offer expires",7,"Urgency"],["Click to open",6,"CTA"],["Click to view",6,"CTA"],["Search engine",6,"Email Tech"],["Complimentary",6,"Free/Giveaway"],["No obligation",6,"Free/Giveaway"],["Online gaming",6,"Gambling"],["Distinguished",6,"Greetings"],["Extraordinary",6,"Hype/Clickbait"],["Drop shipping",6,"Modern Spam 2025"],["Remote income",6,"Modern Spam 2025"],["Yearly income",6,"Money/Finance"],["Second notice",6,"Phishing"],["Lifetime deal",6,"Sales/Promo"],["Special offer",6,"Sales/Promo"],["Stuff on sale",6,"Sales/Promo"],["Subscribe now",5,"Email Tech"],["Game changing",5,"Hype/Clickbait"],["Revolutionary",5,"Hype/Clickbait"],["Unprecedented",5,"Hype/Clickbait"],["Join our team",5,"MLM/WFH"],["Telecommuting",5,"MLM/WFH"],["Laser printer",5,"Spam Indicators"],["I noticed you",4,"Modern Spam 2025"],["Drip campaign",3,"Email Tech"],["Let's connect",3,"Modern Spam 2025"],["Touching base",3,"Modern Spam 2025"],["Adult dating",10,"Adult/Dating"],["Meet singles",10,"Adult/Dating"],["100x returns",10,"Crypto/Web3"],["Bulk mailing",10,"Email Tech"],["Mass mailing",10,"Email Tech"],["Free Instant",10,"Free/Giveaway"],["Miracle cure",10,"Health/Pharma"],["Super Viagra",10,"Health/Pharma"],["Lucky winner",10,"Lottery/Scam"],["Work at home",10,"MLM/WFH"],["Cashcashcash",10,"Money/Finance"],["Penny stocks",10,"Money/Finance"],["We hate spam",10,"Spam Indicators"],["Don't delete",9,"CTA"],["NFT giveaway",9,"Crypto/Web3"],["Instant loan",9,"Debt/Credit"],["Pre-approved",9,"Debt/Credit"],["Free hosting",9,"Free/Giveaway"],["Free Macbook",9,"Free/Giveaway"],["Totally free",9,"Free/Giveaway"],["Cash out now",9,"Gambling"],["Click to win",9,"Gambling"],["100x with AI",9,"Modern Spam 2025"],["Extra income",9,"Money/Finance"],["Huge profits",9,"Money/Finance"],["Money making",9,"Money/Finance"],["Rapid income",9,"Money/Finance"],["Serious cash",9,"Money/Finance"],["Seven figure",9,"Money/Finance"],["Seven-figure",9,"Money/Finance"],["Pure Profits",9,"Sales/Promo"],["Bank details",9,"Security Scam"],["No more debt",8,"Debt/Credit"],["Free forever",8,"Free/Giveaway"],["Free website",8,"Free/Giveaway"],["Give it away",8,"Free/Giveaway"],["Casino bonus",8,"Gambling"],["Online poker",8,"Gambling"],["Most trusted",8,"Greetings"],["Prescription",8,"Health/Pharma"],["Stop snoring",8,"Health/Pharma"],["Testosterone",8,"Health/Pharma"],["Unbelievable",8,"Hype/Clickbait"],["Lucky chance",8,"Lottery/Scam"],["Cash in hand",8,"Money/Finance"],["Earn monthly",8,"Money/Finance"],["Money-making",8,"Money/Finance"],["Final notice",8,"Phishing"],["Last warning",8,"Phishing"],["Bank account",8,"Security Scam"],["Do it today!",8,"Urgency"],["Ends tonight",8,"Urgency"],["Now or never",8,"Urgency"],["Activate now",7,"CTA"],["Click to get",7,"CTA"],["Purchase now",7,"CTA"],["No interests",7,"Debt/Credit"],["Free preview",7,"Free/Giveaway"],["On the house",7,"Free/Giveaway"],["Sign up free",7,"Free/Giveaway"],["100% natural",7,"Health/Pharma"],["Jaw-dropping",7,"Hype/Clickbait"],["Mind-blowing",7,"Hype/Clickbait"],["No middleman",7,"MLM/WFH"],["Retire early",7,"MLM/WFH"],["Starter fees",7,"Money/Finance"],["Best bargain",7,"Sales/Promo"],["Lowest price",7,"Sales/Promo"],["Direct email",7,"Spam Indicators"],["We honor all",7,"Spam Indicators"],["Closing soon",7,"Urgency"],["Expires soon",7,"Urgency"],["Limited time",7,"Urgency"],["Selling fast",7,"Urgency"],["Download now",6,"CTA"],["Breathtaking",6,"Hype/Clickbait"],["Never before",6,"Hype/Clickbait"],["Member stuff",6,"MLM/WFH"],["No inventory",6,"MLM/WFH"],["Dropshipping",6,"Modern Spam 2025"],["Cyber Monday",6,"Sales/Promo"],["Special deal",6,"Sales/Promo"],["Apply online",5,"CTA"],["Register now",5,"CTA"],["Message from",5,"Email Tech"],["Try for free",5,"Free/Giveaway"],["Satisfaction",5,"Guarantees"],["Therapeutics",5,"Health/Pharma"],["Breakthrough",5,"Hype/Clickbait"],["Unparalleled",5,"Hype/Clickbait"],["Confidential",5,"Legal/Compliance"],["Legal notice",5,"Legal/Compliance"],["AI-generated",5,"Modern Spam 2025"],["Unique offer",5,"Sales/Promo"],["Reaching out",3,"Modern Spam 2025"],["Following up",3,"Subject Line"],["Hot singles",10,"Adult/Dating"],["Payday loan",10,"Debt/Credit"],["Lose weight",10,"Health/Pharma"],["Weight loss",10,"Health/Pharma"],["Free crypto",9,"Crypto/Web3"],["Cheap loans",9,"Debt/Credit"],["Debt relief",9,"Debt/Credit"],["Foreclosure",9,"Debt/Credit"],["Free access",9,"Free/Giveaway"],["Free iPhone",9,"Free/Giveaway"],["Spin to win",9,"Gambling"],["Dear friend",9,"Greetings"],["Lose inches",9,"Health/Pharma"],["Beneficiary",9,"Lottery/Scam"],["Sweepstakes",9,"Lottery/Scam"],["Billionaire",9,"Money/Finance"],["Double your",9,"Money/Finance"],["Easy income",9,"Money/Finance"],["Millionaire",9,"Money/Finance"],["Money wired",9,"Money/Finance"],["Pure income",9,"Money/Finance"],["Pure profit",9,"Money/Finance"],["Section 301",9,"Spam Indicators"],["Unsolicited",9,"Spam Indicators"],["Earn crypto",8,"Crypto/Web3"],["Free tokens",8,"Crypto/Web3"],["To the moon",8,"Crypto/Web3"],["Reduce debt",8,"Debt/Credit"],["Email blast",8,"Email Tech"],["Get it free",8,"Free/Giveaway"],["Giving away",8,"Free/Giveaway"],["No gimmicks",8,"Free/Giveaway"],["Hair growth",8,"Health/Pharma"],["Inheritance",8,"Lottery/Scam"],["Work online",8,"MLM/WFH"],["Stock alert",8,"Money/Finance"],["Your income",8,"Money/Finance"],["Undisclosed",8,"Spam Indicators"],["Do it today",8,"Urgency"],["Final hours",8,"Urgency"],["Last chance",8,"Urgency"],["Click below",7,"CTA"],["Get it away",7,"CTA"],["Install now",7,"CTA"],["Order today",7,"CTA"],["Please read",7,"CTA"],["Respond now",7,"CTA"],["Take action",7,"CTA"],["Cheap rates",7,"Debt/Credit"],["Lower rates",7,"Debt/Credit"],["Lowest rate",7,"Debt/Credit"],["No interest",7,"Debt/Credit"],["Free sample",7,"Free/Giveaway"],["Live dealer",7,"Gambling"],["Pain relief",7,"Health/Pharma"],["Supplements",7,"Health/Pharma"],["Astonishing",7,"Hype/Clickbait"],["Lamborghini",7,"Hype/Clickbait"],["Sensational",7,"Hype/Clickbait"],["You qualify",7,"Lottery/Scam"],["Your chance",7,"Lottery/Scam"],["[Important]",7,"Modern Spam 2025"],["Bot trading",7,"Modern Spam 2025"],["Credit card",7,"Money/Finance"],["Confirm now",7,"Phishing"],["Data breach",7,"Phishing"],["Parcel held",7,"Phishing"],["Please open",7,"Phishing"],["Full refund",7,"Sales/Promo"],["Liquidation",7,"Sales/Promo"],["Super promo",7,"Sales/Promo"],["Don't delay",7,"Urgency"],["Immediately",7,"Urgency"],["Never again",7,"Urgency"],["Only X left",7,"Urgency"],["Access here",6,"CTA"],["Web traffic",6,"Email Tech"],["Antioxidant",6,"Health/Pharma"],["Spectacular",6,"Hype/Clickbait"],["Side hustle",6,"Modern Spam 2025"],["Request now",5,"CTA"],["Your status",5,"General"],["Zero chance",5,"General"],["World class",5,"Hype/Clickbait"],["Subject to…",5,"Legal/Compliance"],["Get started",4,"CTA"],["Diagnostics",4,"Health/Pharma"],["Outstanding",4,"Hype/Clickbait"],["Gig economy",4,"Modern Spam 2025"],["Performance",3,"General"],["Accordingly",3,"Legal/Compliance"],["Circle back",3,"Modern Spam 2025"],["Meet girls",10,"Adult/Dating"],["Meet women",10,"Adult/Dating"],["Free money",10,"Free/Giveaway"],["Cheap meds",10,"Health/Pharma"],["Magic pill",10,"Health/Pharma"],["Easy money",10,"Money/Finance"],["Make money",10,"Money/Finance"],["Quick cash",10,"Money/Finance"],["Bulk email",10,"Spam Indicators"],["Mass email",10,"Spam Indicators"],["Bad credit",9,"Debt/Credit"],["Bankruptcy",9,"Debt/Credit"],["Free bonus",9,"Free/Giveaway"],["Free offer",9,"Free/Giveaway"],["Win prizes",9,"Gambling"],["Fat burner",9,"Health/Pharma"],["Stop aging",9,"Health/Pharma"],["Cash bonus",9,"Money/Finance"],["Earn money",9,"Money/Finance"],["Extra cash",9,"Money/Finance"],["Very cheap",9,"Sales/Promo"],["Top urgent",9,"Urgency"],["Get it now",8,"CTA"],["At no cost",8,"Free/Giveaway"],["No gimmick",8,"Free/Giveaway"],["Free chips",8,"Gambling"],["Free spins",8,"Gambling"],["Big profit",8,"Money/Finance"],["For just $",8,"Money/Finance"],["Real money",8,"Money/Finance"],["Six figure",8,"Money/Finance"],["Stock pick",8,"Money/Finance"],["Strong buy",8,"Money/Finance"],["Tax refund",8,"Phishing"],["Guaranteed",8,"Sales/Promo"],["PIN number",8,"Security Scam"],["Top secret",8,"Security Scam"],["Final call",8,"Urgency"],["Today only",8,"Urgency"],["Act before",7,"CTA"],["Click here",7,"CTA"],["Token sale",7,"Crypto/Web3"],["Best rates",7,"Debt/Credit"],["Great news",7,"Greetings"],["Anti-aging",7,"Health/Pharma"],["Supplement",7,"Health/Pharma"],["Astounding",7,"Hype/Clickbait"],["Can't miss",7,"Hype/Clickbait"],["Incredible",7,"Hype/Clickbait"],["No selling",7,"MLM/WFH"],["Online job",7,"MLM/WFH"],["Money back",7,"Money/Finance"],["Save money",7,"Money/Finance"],["Top dollar",7,"Money/Finance"],["US dollars",7,"Money/Finance"],["Log in now",7,"Phishing"],["Free leads",7,"Sales/Marketing"],["Flash sale",7,"Urgency"],["Access now",6,"CTA"],["Free trial",6,"Free/Giveaway"],["Phenomenal",6,"Hype/Clickbait"],["Easy terms",6,"Money/Finance"],["Investment",6,"Money/Finance"],["We noticed",6,"Phishing"],["Best offer",6,"Sales/Promo"],["Best price",6,"Sales/Promo"],["Buy direct",6,"Sales/Promo"],["Save up to",6,"Sales/Promo"],["Don't miss",6,"Urgency"],["Going fast",6,"Urgency"],["Join today",5,"CTA"],["Watch this",5,"CTA"],["Blockchain",5,"Crypto/Web3"],["Cold email",5,"Email Tech"],["Free quote",5,"Free/Giveaway"],["Hidden gem",5,"Hype/Clickbait"],["Number one",5,"Hype/Clickbait"],["Obligation",5,"Legal/Compliance"],["High score",4,"General"],["Healthcare",4,"Health/Pharma"],["Well-being",4,"Health/Pharma"],["Remarkable",4,"Hype/Clickbait"],["Free gift",10,"Free/Giveaway"],["100% free",10,"Money/Finance"],["Fast cash",10,"Money/Finance"],["Bill 1618",10,"Spam Indicators"],["Spam free",10,"Spam Indicators"],["Fast loan",9,"Debt/Credit"],["Refinance",9,"Debt/Credit"],["Timeshare",9,"Debt/Credit"],["Diet pill",9,"Health/Pharma"],["Claim now",9,"Lottery/Scam"],["Big bucks",9,"Money/Finance"],["Earn Cash",9,"Money/Finance"],["Get Money",9,"Money/Finance"],["Passwords",9,"Security Scam"],["Act fast!",9,"Urgency"],["Call free",8,"CTA"],["Call now!",8,"CTA"],["Debt free",8,"Debt/Credit"],["Free info",8,"Free/Giveaway"],["Zero cost",8,"Free/Giveaway"],["Belly fat",8,"Health/Pharma"],["AI crypto",8,"Modern Spam 2025"],["100% more",8,"Money/Finance"],["Off shore",8,"Money/Finance"],["Mega sale",8,"Sales/Promo"],["Do it now",8,"Urgency"],["Click now",7,"CTA"],["Must read",7,"CTA"],["Order now",7,"CTA"],["Good news",7,"Greetings"],["No hidden",7,"Guarantees"],["A few bob",7,"Money/Finance"],["Buy today",7,"Sales/Promo"],["Risk-free",7,"Sales/Promo"],["VIP offer",7,"Sales/Promo"],["Zero risk",7,"Sales/Promo"],["Antivirus",7,"Security Scam"],["Copy DVDs",7,"Spam Indicators"],["Apply now",6,"CTA"],["Open this",6,"CTA"],["Auto loan",6,"Debt/Credit"],["Blackjack",6,"Gambling"],["Attention",6,"Greetings"],["Greetings",6,"Greetings"],["Fantastic",6,"Hype/Clickbait"],["Cash flow",6,"Money/Finance"],["Best deal",6,"Sales/Promo"],["Clearance",6,"Sales/Promo"],["Unlimited",6,"Sales/Promo"],["Countdown",6,"Urgency"],["Open file",5,"CTA"],["Metaverse",5,"Crypto/Web3"],["Whitelist",5,"Crypto/Web3"],["Job alert",5,"General"],["Treatment",5,"Health/Pharma"],["Top-notch",5,"Hype/Clickbait"],["Unmatched",5,"Hype/Clickbait"],["Unrivaled",5,"Hype/Clickbait"],["Wonderful",5,"Hype/Clickbait"],["Per month",5,"Money/Finance"],["Exclusive",5,"Sales/Promo"],["Promotion",5,"Sales/Promo"],["Subscribe",4,"Email Tech"],["Presently",4,"General"],["Nutrition",4,"Health/Pharma"],["Regarding",3,"Email"],["Invoice #",3,"Subject Line"],["Erectile",10,"Health/Pharma"],["Nigerian",10,"Lottery/Scam"],["[Winner]",10,"Modern Spam 2025"],["Get rich",10,"Money/Finance"],["Not junk",10,"Spam Indicators"],["Not scam",10,"Spam Indicators"],["Not spam",10,"Spam Indicators"],["Free DVD",9,"Free/Giveaway"],["Giveaway",9,"Free/Giveaway"],["Win cash",9,"Gambling"],["Burn fat",9,"Health/Pharma"],["Cure for",9,"Health/Pharma"],["Downline",9,"MLM/WFH"],["[Urgent]",9,"Modern Spam 2025"],["Act now!",9,"Urgency"],["Explicit",8,"Adult/Dating"],["Call now",8,"CTA"],["Rug pull",8,"Crypto/Web3"],["Mortgage",8,"Debt/Credit"],["For free",8,"Free/Giveaway"],["No catch",8,"Free/Giveaway"],["No costs",8,"Free/Giveaway"],["Gambling",8,"Gambling"],["Get slim",8,"Health/Pharma"],["Pharmacy",8,"Health/Pharma"],["Slimming",8,"Health/Pharma"],["Cash out",8,"Money/Finance"],["Get paid",8,"Money/Finance"],["Offshore",8,"Money/Finance"],["Save big",8,"Sales/Promo"],["Password",8,"Security Scam"],["Hurry up",8,"Urgency"],["Last Day",8,"Urgency"],["Mint NFT",7,"Crypto/Web3"],["Roulette",7,"Gambling"],["Esteemed",7,"Greetings"],["Medicine",7,"Health/Pharma"],["Windfall",7,"Money/Finance"],["Closeout",7,"Sales/Promo"],["For Only",7,"Sales/Promo"],["Hot deal",7,"Sales/Promo"],["One time",7,"Urgency"],["Ethereum",6,"Crypto/Web3"],["Play now",6,"Gambling"],["Reverses",6,"Health/Pharma"],["As an AI",6,"Modern Spam 2025"],["Cashback",6,"Money/Finance"],["Transfer",6,"Money/Finance"],["Treasure",6,"Money/Finance"],["Discount",6,"Sales/Promo"],["Lifetime",6,"Sales/Promo"],["You save",6,"Sales/Promo"],["Deadline",6,"Urgency"],["One-time",6,"Urgency"],["Shop now",5,"CTA"],["View now",5,"CTA"],["Good day",5,"Greetings"],["Majestic",5,"Hype/Clickbait"],["Stunning",5,"Hype/Clickbait"],["The best",5,"Hype/Clickbait"],["Ultimate",5,"Hype/Clickbait"],["Per week",5,"Money/Finance"],["Vacation",5,"Sales/Promo"],["Warranty",5,"Sales/Promo"],["Near you",4,"General"],["Hi there",4,"Greetings"],["Wellness",4,"Health/Pharma"],["Beverage",3,"General"],["F r e e",10,"Free/Giveaway"],["Vicodin",10,"Health/Pharma"],["Lottery",10,"Lottery/Scam"],["Notspam",10,"Spam Indicators"],["Naughty",9,"Adult/Dating"],["Bet now",9,"Gambling"],["Big win",9,"Gambling"],["Miracle",9,"Health/Pharma"],["Jackpot",9,"Lottery/Scam"],["Winning",9,"Lottery/Scam"],["Win big",9,"Money/Finance"],["Hook up",8,"Adult/Dating"],["Airdrop",8,"Crypto/Web3"],["No cost",8,"Free/Giveaway"],["Beloved",8,"Greetings"],["Dearest",8,"Greetings"],["Million",8,"Money/Finance"],["Act now",8,"Urgency"],["Bitcoin",7,"Crypto/Web3"],["Presale",7,"Crypto/Web3"],["No fees",7,"Free/Giveaway"],["No risk",7,"Free/Giveaway"],["Betting",7,"Gambling"],["Snoring",7,"Health/Pharma"],["Billion",7,"Money/Finance"],["Dollars",7,"Money/Finance"],["50% off",7,"Sales/Promo"],["Bargain",7,"Sales/Promo"],["Buy now",7,"Sales/Promo"],["Get now",6,"CTA"],["Healing",6,"Health/Pharma"],["Amazing",6,"Hype/Clickbait"],["Ferrari",6,"Hype/Clickbait"],["Supreme",6,"Hype/Clickbait"],["Freedom",6,"MLM/WFH"],["ChatGPT",6,"Modern Spam 2025"],["Per day",6,"Money/Finance"],["Profits",6,"Money/Finance"],["Expires",6,"Urgency"],["Instant",6,"Urgency"],["Call me",5,"CTA"],["Altcoin",5,"Crypto/Web3"],["Traffic",5,"Email Tech"],["Dormant",5,"General"],["Natural",5,"Health/Pharma"],["Removes",5,"Health/Pharma"],["Therapy",5,"Health/Pharma"],["Vaccine",5,"Health/Pharma"],["All new",5,"Sales/Promo"],["Limited",5,"Urgency"],["Fitness",4,"Health/Pharma"],["Organic",4,"Health/Pharma"],["Shopper",4,"Sales/Promo"],["Welcome",3,"Greetings"],["Cialis",10,"Health/Pharma"],["Valium",10,"Health/Pharma"],["Viagra",10,"Health/Pharma"],["Prizes",10,"Lottery/Scam"],["Winner",10,"Lottery/Scam"],["S 1618",10,"Spam Indicators"],["Erotic",9,"Adult/Dating"],["Casino",9,"Gambling"],["Libido",9,"Health/Pharma"],["Upline",9,"MLM/WFH"],["Earn $",9,"Money/Finance"],["Make $",9,"Money/Finance"],["Mature",8,"Adult/Dating"],["0 down",8,"Debt/Credit"],["Urgent",8,"Urgency"],["Crypto",7,"Crypto/Web3"],["Bookie",7,"Gambling"],["Det ox",7,"Health/Pharma"],["Herbal",7,"Health/Pharma"],["Remedy",7,"Health/Pharma"],["Credit",7,"Money/Finance"],["Income",7,"Money/Finance"],["Wealth",7,"Money/Finance"],["Only $",7,"Sales/Promo"],["Opt in",6,"Email Tech"],["Weight",6,"Health/Pharma"],["Profit",6,"Money/Finance"],["Coupon",6,"Sales/Promo"],["Rebate",6,"Sales/Promo"],["Save $",6,"Sales/Promo"],["Expire",6,"Urgency"],["Opt-in",5,"Email Tech"],["Friend",5,"Greetings"],["Hello!",5,"Greetings"],["Refund",5,"Guarantees"],["Luxury",5,"Sales/Promo"],["Medium",4,"General"],["Clinic",4,"Health/Pharma"],["Please",3,"General"],["Babes",10,"Adult/Dating"],["Kinky",10,"Adult/Dating"],["Naked",10,"Adult/Dating"],["Free!",10,"Free/Giveaway"],["Drugs",10,"Health/Pharma"],["Penis",10,"Health/Pharma"],["Xanax",10,"Health/Pharma"],["Prize",10,"Lottery/Scam"],["Cutie",9,"Adult/Dating"],["Cures",9,"Health/Pharma"],["Pills",9,"Health/Pharma"],["Rolex",9,"Spam Indicators"],["Adult",8,"Adult/Dating"],["Loans",8,"Debt/Credit"],["Magic",8,"Hype/Clickbait"],["Award",8,"Lottery/Scam"],["Cheap",8,"Sales/Promo"],["Poker",7,"Gambling"],["Slots",7,"Gambling"],["Detox",7,"Health/Pharma"],["Lambo",7,"Hype/Clickbait"],["Money",7,"Money/Finance"],["Hurry",7,"Urgency"],["Claim",6,"CTA"],["Wager",6,"Gambling"],["Debit",6,"Money/Finance"],["Click",5,"CTA"],["Token",5,"Crypto/Web3"],["Trial",5,"Sales/Promo"],["Phone",4,"General"],["Legal",4,"Legal/Compliance"],["Human",3,"General"],["Leave",3,"General"],["Stuff",3,"General"],["Great",3,"Hype/Clickbait"],["Quote",3,"Sales/Promo"],["Nude",10,"Adult/Dating"],["Porn",10,"Adult/Dating"],["Free",9,"Free/Giveaway"],["Cure",9,"Health/Pharma"],["Spam",9,"Spam Indicators"],["Sexy",8,"Adult/Dating"],["Teen",8,"Adult/Dating"],["Debt",8,"Debt/Credit"],["Loan",8,"Debt/Credit"],["Junk",8,"Spam Indicators"],["Moon",7,"Crypto/Web3"],["Pump",7,"Crypto/Web3"],["Diet",7,"Health/Pharma"],["100%",7,"Hype/Clickbait"],["Cash",7,"Money/Finance"],["Wife",6,"Adult/Dating"],["DeFi",6,"Crypto/Web3"],["Dump",6,"Crypto/Web3"],["Gold",6,"Money/Finance"],["Rush",6,"Urgency"],["Call",5,"CTA"],["HODL",5,"Crypto/Web3"],["Web3",5,"Crypto/Web3"],["Odds",5,"Gambling"],["Fwd:",5,"Modern Spam 2025"],["Deal",5,"Sales/Promo"],["Sale",5,"Sales/Promo"],["Save",5,"Sales/Promo"],["Life",4,"General"],["Body",4,"Health/Pharma"],["Soon",4,"Urgency"],["Form",3,"General"],["Name",3,"General"],["Sex",10,"Adult/Dating"],["XXX",10,"Adult/Dating"],["MLM",10,"MLM/WFH"],["$$$",10,"Money/Finance"],["£££",10,"Money/Finance"],["€€€",10,"Money/Finance"],["!!!",10,"Spam Indicators"],["Won",9,"Lottery/Scam"],["Win",8,"Lottery/Scam"],["???",8,"Spam Indicators"],["18+",7,"Adult/Dating"],["ICO",7,"Crypto/Web3"],["NFT",6,"Crypto/Web3"],["Buy",6,"Sales/Promo"],["VIP",6,"Sales/Promo"],["Re:",4,"Phishing"],["New",3,"General"],["4U",8,"Spam Indicators"]]
+const API_URL = "https://webhook-all-spend-8889889350de.herokuapp.com/stats";
 
-const LEGEND_DATA = [
-  [10,"CRITICAL","Guaranteed spam trigger — scams, phishing, lottery, Nigerian fraud, pharma","NEVER use","#ff2d55"],
-  [9,"VERY HIGH","Near-certain trigger — MLM, easy money, lottery, adult, fake claims","Avoid completely","#ff6030"],
-  [8,"HIGH","Strong trigger — urgency manipulation, fake security, suspicious patterns","Avoid in cold email","#ff8c00"],
-  [7,"MEDIUM-HIGH","Moderate risk, context-dependent, often used in spammy promotions","Use with extreme caution","#ffb800"],
-  [6,"MEDIUM","Situational trigger, lower risk in B2B with good domain reputation","Caution advised","#f0d000"],
-  [5,"LOW-MEDIUM","Some risk depending on context and domain reputation","Generally OK in B2B","#a8cc00"],
-  [4,"LOW","Minor signal, usually OK in legitimate B2B email","Usually safe","#4cd964"],
-  [3,"VERY LOW","Rarely triggers filters if overall content quality is good","Safe","#32d7a0"],
-  [2,"MINIMAL","Standard B2B terminology, almost no spam signal","Safe","#30d5c8"],
-  [1,"NONE","No meaningful spam signal whatsoever","Safe","#5ac8fa"],
-];
+let page = 1;
+const PAGE_SIZE = 500;
+let lastData = null;
+let activeWorkspace = "";
 
-// Sort by phrase length descending to match longer phrases first
-const SORTED_DB = [...SPAM_DB].sort((a,b) => b[0].length - a[0].length);
-
-function getColor(score) {
-  const colors = {10:'#ff2d55',9:'#ff6030',8:'#ff8c00',7:'#ffb800',6:'#f0d000',5:'#a8cc00',4:'#4cd964',3:'#32d7a0',2:'#30d5c8',1:'#5ac8fa'};
-  return colors[score] || '#888';
+function setWorkspace(id, btn) {
+  activeWorkspace = id;
+  document.querySelectorAll('.ws-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  page = 1;
+  loadData();
 }
 
-function analyze() {
-  const text = document.getElementById('inputText').value;
-  if (!text.trim()) return;
-
-  const results = document.getElementById('results');
-  results.classList.remove('visible');
-
-  // Find matches
-  const found = [];
-  const lowerText = text.toLowerCase();
-
-  // Track which character positions are already matched
-  const matchedRanges = [];
-
-  for (const [phrase, score, cat] of SORTED_DB) {
-    const lowerPhrase = phrase.toLowerCase();
-    let idx = 0;
-    while (true) {
-      const pos = lowerText.indexOf(lowerPhrase, idx);
-      if (pos === -1) break;
-
-      // Check word boundary (simple check)
-      const before = pos === 0 || !/[a-zA-Z0-9]/.test(text[pos-1]);
-      const after = (pos + phrase.length) >= text.length || !/[a-zA-Z0-9]/.test(text[pos + phrase.length]);
-
-      if (before && after) {
-        // Check not overlapping
-        const overlapping = matchedRanges.some(([s,e]) => pos < e && pos + phrase.length > s);
-        if (!overlapping) {
-          matchedRanges.push([pos, pos + phrase.length]);
-          found.push({ phrase, score, cat, pos, len: phrase.length });
-        }
-      }
-      idx = pos + 1;
-    }
-  }
-
-  // Sort by position for highlight
-  found.sort((a,b) => a.pos - b.pos);
-
-  // Deduplicate for found list
-  const seen = new Map();
-  for (const f of found) {
-    const key = f.phrase.toLowerCase();
-    if (!seen.has(key) || seen.get(key).score < f.score) seen.set(key, f);
-  }
-  const unique = [...seen.values()].sort((a,b) => b.score - a.score);
-
-  // Stats
-  const totalScore = unique.reduce((s,f) => s + f.score, 0);
-  const critical = unique.filter(f => f.score >= 9).length;
-  const high = unique.filter(f => f.score >= 7 && f.score <= 8).length;
-  const moderate = unique.filter(f => f.score < 7).length;
-
-  document.getElementById('totalScore').textContent = totalScore || '0';
-
-  // Stats cards
-  const statsRow = document.getElementById('statsRow');
-  statsRow.innerHTML = `
-    <div class="stat-card">
-      <div class="stat-val ${critical > 0 ? 'c-danger' : 'c-ok'}">${critical}</div>
-      <div class="stat-lbl">Critical (9–10)</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-val ${high > 0 ? 'c-warn' : 'c-ok'}">${high}</div>
-      <div class="stat-lbl">High Risk (7–8)</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-val">${moderate}</div>
-      <div class="stat-lbl">Moderate (1–6)</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-val c-accent">${unique.length}</div>
-      <div class="stat-lbl">Total Triggers</div>
-    </div>
-  `;
-
-  // Risk bar
-  const riskBarWrap = document.getElementById('riskBarWrap');
-  const riskPct = Math.min(100, Math.round((totalScore / Math.max(1, unique.length * 10)) * 100 + (unique.length * 3)));
-  riskBarWrap.style.display = 'block';
-  document.getElementById('riskPct').textContent = Math.min(100, riskPct) + '%';
-  setTimeout(() => {
-    document.getElementById('riskFill').style.width = Math.min(100, riskPct) + '%';
-  }, 50);
-
-  // Found list
-  const foundList = document.getElementById('foundList');
-  if (unique.length === 0) {
-    foundList.innerHTML = '<div class="no-issues">✓ No spam triggers found. Your template looks clean!</div>';
-  } else {
-    foundList.innerHTML = unique.map(f => {
-      const c = getColor(f.score);
-      return `<span class="found-item" style="color:${c};background:${c}18;border-color:${c}44">
-        <span style="font-weight:700">${escHtml(f.phrase)}</span>
-        <span class="found-score">[${f.score}]</span>
-        <span class="found-cat">${f.cat}</span>
-      </span>`;
-    }).join('');
-  }
-
-  // Highlighted preview
-  let html = '';
-  let cursor = 0;
-  const sorted = [...found].sort((a,b) => a.pos - b.pos);
-
-  for (const f of sorted) {
-    if (f.pos > cursor) {
-      html += escHtml(text.slice(cursor, f.pos));
-    }
-    const c = getColor(f.score);
-    const tooltip = `[${f.score}] ${f.cat}`;
-    html += `<span class="hi score-${f.score}" data-score="${tooltip}" style="color:${c}">${escHtml(text.slice(f.pos, f.pos + f.len))}</span>`;
-    cursor = f.pos + f.len;
-  }
-  if (cursor < text.length) html += escHtml(text.slice(cursor));
-
-  document.getElementById('previewBox').innerHTML = html;
-
-  // Legend
-  const legend = document.getElementById('legend');
-  legend.innerHTML = `
-    <div class="legend-row header">
-      <div class="legend-cell">Score</div>
-      <div class="legend-cell">Risk Level</div>
-      <div class="legend-cell">Description</div>
-      <div class="legend-cell">Recommendation</div>
-    </div>
-    ${LEGEND_DATA.map(([score, level, desc, rec, color]) => `
-      <div class="legend-row">
-        <div class="legend-cell l-score" style="color:${color}">${score}</div>
-        <div class="legend-cell l-level" style="color:${color}">${level}</div>
-        <div class="legend-cell l-desc">${desc}</div>
-        <div class="legend-cell l-rec" style="color:${color}">${rec}</div>
-      </div>
-    `).join('')}
-  `;
-
-  results.classList.add('visible');
-}
-
-function clearAll() {
-  document.getElementById('inputText').value = '';
-  document.getElementById('totalScore').textContent = '—';
-  document.getElementById('results').classList.remove('visible');
-}
-
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// Enter-less submit on Ctrl+Enter
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('inputText').addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') analyze();
+function buildWorkspaceSwitcher(workspaces) {
+  const bar = document.getElementById('ws-bar');
+  const current = activeWorkspace;
+  bar.innerHTML = `<button class="ws-btn ${current === '' ? 'active' : ''}" onclick="setWorkspace('', this)">All teams</button>`;
+  workspaces.forEach(w => {
+    const btn = document.createElement('button');
+    btn.className = 'ws-btn' + (current === w.id ? ' active' : '');
+    btn.textContent = w.name;
+    btn.onclick = function() { setWorkspace(w.id, this); };
+    bar.appendChild(btn);
   });
-});
+}
+
+function badgeClass(type) {
+  if (!type) return 'badge-default';
+  const t = type.toLowerCase();
+  if (t.includes('sent')) return 'badge-sent';
+  if (t.includes('open')) return 'badge-opened';
+  if (t.includes('repl')) return 'badge-replied';
+  if (t.includes('bounc')) return 'badge-bounced';
+  return 'badge-default';
+}
+
+function fillClass(type) {
+  if (!type) return 'fill-default';
+  const t = type.toLowerCase();
+  if (t.includes('sent')) return 'fill-sent';
+  if (t.includes('open')) return 'fill-opened';
+  if (t.includes('repl')) return 'fill-replied';
+  if (t.includes('bounc')) return 'fill-bounced';
+  return 'fill-default';
+}
+
+function fmtDate(ts) {
+  if (!ts) return '';
+  try {
+    const d = new Date(ts);
+    return d.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+  } catch { return ts; }
+}
+
+function buildParams() {
+  const p = new URLSearchParams();
+  if (activeWorkspace) p.set('workspace', activeWorkspace);
+  const campaign = document.getElementById('f-campaign').value;
+  const account  = document.getElementById('f-account').value;
+  const type     = document.getElementById('f-type').value;
+  const from     = document.getElementById('f-from').value;
+  const to       = document.getElementById('f-to').value;
+  if (campaign) p.set('campaign_id', campaign);
+  if (account)  p.set('email_account', account);
+  if (type)     p.set('event_type', type);
+  if (from)     p.set('date_from', from);
+  if (to)       p.set('date_to', to);
+  p.set('limit', PAGE_SIZE);
+  p.set('offset', (page - 1) * PAGE_SIZE);
+  return p;
+}
+
+async function loadData() {
+  const btn    = document.getElementById('refresh-btn');
+  const icon   = document.getElementById('refresh-icon');
+  const status = document.getElementById('status-line');
+  const errBox = document.getElementById('error-box');
+  btn.disabled = true;
+  icon.classList.add('spin');
+  status.textContent = 'Loading data...';
+  errBox.style.display = 'none';
+
+  try {
+    const res  = await fetch(`${API_URL}?${buildParams()}`);
+    const json = await res.json();
+    if (!json.ok) throw new Error('API returned error');
+    lastData = json;
+    const now = new Date();
+    status.textContent = `Loaded ${json.metrics.total.toLocaleString()} events · ${now.toLocaleTimeString('en-GB')}`;
+    buildWorkspaceSwitcher(json.filter_options.workspaces || []);
+    buildMonthOptions();
+    populateFilters(json.filter_options);
+    renderMetrics(json.metrics);
+    renderCharts(json);
+    renderTable(json);
+  } catch (e) {
+    errBox.textContent = 'Load error: ' + e.message;
+    errBox.style.display = 'block';
+    status.textContent = 'Load failed';
+  } finally {
+    btn.disabled = false;
+    icon.classList.remove('spin');
+  }
+}
+
+function applyMonth() {
+  const month = document.getElementById('f-month').value;
+  if (month) {
+    document.getElementById('f-from').value = month + '-01';
+    const d = new Date(month + '-01');
+    d.setMonth(d.getMonth() + 1);
+    d.setDate(0);
+    document.getElementById('f-to').value = d.toISOString().slice(0, 10);
+  } else {
+    document.getElementById('f-from').value = '';
+    document.getElementById('f-to').value = '';
+  }
+  applyFilters();
+}
+
+function buildMonthOptions() {
+  const sel = document.getElementById('f-month');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All months</option>';
+  const now = new Date();
+  for (let i = 0; i < 18; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const val = d.toISOString().slice(0, 7);
+    const label = d.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+    const opt = document.createElement('option');
+    opt.value = val; opt.textContent = label;
+    if (val === cur) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+function resetFilters() {
+  ['f-campaign','f-account','f-type','f-month'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-from').value = '';
+  document.getElementById('f-to').value = '';
+  document.getElementById('search').value = '';
+  applyFilters();
+}
+
+function populateFilters(opts) {
+  // Campaigns
+  const cSel = document.getElementById('f-campaign');
+  const cCur = cSel.value;
+  cSel.innerHTML = '<option value="">All campaigns</option>';
+  (opts.campaigns || []).forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = c.name;
+    if (c.id === cCur) o.selected = true;
+    cSel.appendChild(o);
+  });
+
+  // Accounts
+  const aSel = document.getElementById('f-account');
+  const aCur = aSel.value;
+  aSel.innerHTML = '<option value="">All email accounts</option>';
+  (opts.accounts || []).forEach(a => {
+    const o = document.createElement('option');
+    o.value = a; o.textContent = a;
+    if (a === aCur) o.selected = true;
+    aSel.appendChild(o);
+  });
+
+  // Event types
+  const tSel = document.getElementById('f-type');
+  const tCur = tSel.value;
+  tSel.innerHTML = '<option value="">All event types</option>';
+  (opts.event_types || []).forEach(t => {
+    const o = document.createElement('option');
+    o.value = t; o.textContent = t;
+    if (t === tCur) o.selected = true;
+    tSel.appendChild(o);
+  });
+}
+
+function renderMetrics(m) {
+  const sent    = m.sent || 0;
+  const opened  = m.opened || 0;
+  const replied = m.replied_unique || 0;
+  const bounced = m.bounced || 0;
+
+  document.getElementById('m-total').textContent      = (m.total || 0).toLocaleString();
+  document.getElementById('m-sent').textContent       = sent.toLocaleString();
+  document.getElementById('m-opened').textContent     = opened.toLocaleString();
+  document.getElementById('m-replied').textContent    = replied.toLocaleString();
+  document.getElementById('m-bounced').textContent    = bounced.toLocaleString();
+  document.getElementById('m-open-rate').textContent  = sent ? Math.round(opened  / sent * 100) + '%' : '—';
+  document.getElementById('m-reply-rate').textContent = sent ? Math.round(replied / sent * 100) + '%' : '—';
+  document.getElementById('m-bounce-rate').textContent= sent ? Math.round(bounced / sent * 100) + '%' : '—';
+  document.getElementById('m-campaigns').textContent  = (m.campaigns || 0).toLocaleString();
+  document.getElementById('m-accounts').textContent   = (m.accounts  || 0).toLocaleString();
+  document.getElementById('m-leads').textContent      = (m.leads     || 0).toLocaleString();
+  document.getElementById('m-days').textContent       = (m.days_active || 0).toLocaleString();
+}
+
+function renderBarChart(containerId, entries, labelKey, countKey, fillCls) {
+  const el = document.getElementById(containerId);
+  if (!entries || !entries.length) { el.innerHTML = '<div class="placeholder">No data</div>'; return; }
+  const max = entries[0][countKey];
+  el.innerHTML = entries.map(r => `
+    <div class="bar-row">
+      <div class="bar-label" title="${r[labelKey] || '—'}">${r[labelKey] || '—'}</div>
+      <div class="bar-track"><div class="bar-fill ${fillCls}" style="width:${Math.round(r[countKey]/max*100)}%"></div></div>
+      <div class="bar-count">${r[countKey].toLocaleString()}</div>
+    </div>`).join('');
+}
+
+function renderCharts(json) {
+  // Event types
+  const tEl = document.getElementById('chart-types');
+  if (!json.by_type.length) { tEl.innerHTML = '<div class="placeholder">No data</div>'; }
+  else {
+    const max = json.by_type[0].count;
+    tEl.innerHTML = json.by_type.map(r => `
+      <div class="bar-row">
+        <div class="bar-label" title="${r.event_type}">${r.event_type}</div>
+        <div class="bar-track"><div class="bar-fill ${fillClass(r.event_type)}" style="width:${Math.round(r.count/max*100)}%"></div></div>
+        <div class="bar-count">${r.count.toLocaleString()}</div>
+      </div>`).join('');
+  }
+
+  renderBarChart('chart-campaigns', json.by_campaign, 'name',         'count', 'fill-campaign');
+  renderBarChart('chart-accounts',  json.by_account,  'email_account','count', 'fill-account');
+  renderBarChart('chart-leads',     json.by_lead,     'lead_email',   'count', 'fill-replied');
+  renderBarChart('chart-steps',     json.by_step,     'step',         'count', 'fill-default');
+
+  // Days
+  const dEl = document.getElementById('chart-days');
+  if (!json.by_day.length) { dEl.innerHTML = '<div class="placeholder">No data</div>'; return; }
+  const dayMax = Math.max(...json.by_day.map(r => r.count), 1);
+  dEl.innerHTML = json.by_day.slice(-30).map(r => `
+    <div class="bar-row">
+      <div class="bar-label">${r.day.slice(5)}</div>
+      <div class="bar-track"><div class="bar-fill fill-campaign" style="width:${Math.round(r.count/dayMax*100)}%"></div></div>
+      <div class="bar-count">${r.count}</div>
+    </div>`).join('');
+}
+
+function renderTable(json) {
+  const tbody      = document.getElementById('table-body');
+  const total      = json.total_filtered || 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  document.getElementById('table-count').textContent = `${total.toLocaleString()} events`;
+  document.getElementById('page-info').textContent   = `Page ${page} of ${totalPages}`;
+  document.getElementById('prev-btn').disabled = page <= 1;
+  document.getElementById('next-btn').disabled = page >= totalPages;
+
+  const events = json.events || [];
+  if (!events.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="placeholder">No events match the filters</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = events.map(r => `
+    <tr>
+      <td title="${r.event_ts || ''}">${fmtDate(r.event_ts)}</td>
+      <td><span class="badge ${badgeClass(r.event_type)}">${r.event_type || '—'}</span></td>
+      <td title="${r.campaign_name || ''}">${r.campaign_name || '—'}</td>
+      <td title="${r.lead_email || ''}">${r.lead_email || '—'}</td>
+      <td title="${r.email_account || ''}">${r.email_account || '—'}</td>
+      <td>${r.step || '—'}</td>
+      <td>${r.variant || '—'}</td>
+      <td title="${r.email_subject || ''}">${r.email_subject || '—'}</td>
+      <td title="${r.reply_text_snippet || ''}">${r.reply_text_snippet || '—'}</td>
+    </tr>`).join('');
+}
+
+function changePage(dir) {
+  page += dir;
+  loadData();
+  window.scrollTo({ top: document.querySelector('.table-section').offsetTop - 20, behavior: 'smooth' });
+}
 </script>
 </body>
 </html>
